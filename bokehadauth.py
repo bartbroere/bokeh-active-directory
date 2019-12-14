@@ -1,32 +1,31 @@
-from typing import Optional, Awaitable
-from urllib.request import BaseHandler
+"""
+bokehadauth.py, when hooked into Bokeh server, will require Active Directory login by users.
+
+This module is meant to be specified as argument to a bokeh server.
+bokeh serve --auth-module=bokehadauth.py [...]
+"""
 
 import easyad
-from bokeh.server.auth_provider import AuthProvider
 from tornado.escape import json_decode, url_escape, json_encode
 from tornado.web import RequestHandler
 
 
-class ActiveDirectoryAuthProvider(AuthProvider):
+def get_user(request_handler):
+    user_json = request_handler.get_secure_cookie("user")
+    if user_json:
+        return json_decode(user_json)
+    else:
+        return None
 
-    def __init__(self):
-        super().__init__()
 
-    def get_user(self):
-        user_json = self.get_secure_cookie("user")
-        if user_json:
-            return json_decode(user_json)
-        else:
-            return None
-
-    def get_login_url(self):
-        return u"/login"
+def get_login_url(request_handler):
+    return u"/login"
 
 
 class LoginHandler(RequestHandler):
-
-    def data_received(self, chunk: bytes) -> Optional[Awaitable[None]]:
-        pass
+    """
+    The handler for logins. Bokeh promises to include a route to this handler
+    """
 
     def get(self):
         self.render("login.html", next=self.get_argument("next", "/"))
@@ -44,8 +43,3 @@ class LoginHandler(RequestHandler):
             self.redirect(u"/login" + error)
             self.clear_cookie("user")
 
-# Code below needs to be handled by something in bokeh
-# application = tornado.web.Application([
-#     (r"/", MainHandler),
-#     (r"/login", LoginHandler),
-# ], cookie_secret="__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__")
