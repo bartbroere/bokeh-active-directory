@@ -1,9 +1,11 @@
 """
 bokehadauth.py, when hooked into Bokeh server, will require Active Directory login by users.
+Currently, it expects the environment variables AD_SERVER and AD_DOMAIN to be set correctly.
 
 This module is meant to be specified as argument to a bokeh server.
-bokeh serve --auth-module=bokehadauth.py [...]
+bokeh serve --auth-module=bokehadauth.py --cookie-secret YOURSECRETHERE [...]
 """
+import os
 
 import easyad
 from tornado.escape import json_decode, url_escape, json_encode
@@ -18,8 +20,7 @@ def get_user(request_handler):
         return None
 
 
-def get_login_url(request_handler):
-    return u"/login"
+login_url = u"/login"
 
 
 class LoginHandler(RequestHandler):
@@ -31,7 +32,8 @@ class LoginHandler(RequestHandler):
         self.render("login.html", next=self.get_argument("next", "/"))
 
     def post(self):
-        self.ad = easyad.EasyAD()
+        self.ad = easyad.EasyAD({'AD_SERVER': os.environ.get('AD_SERVER', None),
+                                 'AD_DOMAIN': os.environ.get('AD_DOMAIN', None)})
         username = self.get_argument("username", "")
         password = self.get_argument("password", "")
         is_authorised = self.ad.authenticate_user(username, password, json_safe=True)
@@ -42,4 +44,3 @@ class LoginHandler(RequestHandler):
             error = u"?error=" + url_escape("Login incorrect.")
             self.redirect(u"/login" + error)
             self.clear_cookie("user")
-
