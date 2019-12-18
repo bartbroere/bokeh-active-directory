@@ -11,3 +11,4 @@ This module is meant to be specified as argument to a bokeh server.
 + https://stackoverflow.com/questions/6514783/tornado-login-examples-tutorials
 + https://www.tornadoweb.org/en/stable/guide/security.html
 + https://codepen.io/miroot/pen/qwIgC
++ https://www.lfd.uci.edu/~gohlke/pythonlibs/#python-ldap
