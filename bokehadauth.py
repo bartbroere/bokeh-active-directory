@@ -20,7 +20,7 @@ def get_user(request_handler):
         return None
 
 
-login_url = u"/login"
+login_url = "/login"
 
 
 class LoginHandler(RequestHandler):
@@ -39,8 +39,8 @@ class LoginHandler(RequestHandler):
         is_authorised = self.ad.authenticate_user(username, password, json_safe=True)
         if is_authorised and username:
             self.set_secure_cookie("user", json_encode(username))
-            self.redirect(self.get_argument("next", u"/"))
+            self.redirect(self.get_argument("next", "/"))
         else:
-            error = u"?error=" + url_escape("Login incorrect.")
-            self.redirect(u"/login" + error)
+            error = "?error=" + url_escape("Login incorrect.")
+            self.redirect("/login" + error)
             self.clear_cookie("user")
